@@ -1,7 +1,7 @@
 # coding: utf-8
 
 # Usage
-# utting_jsons.pyに対し、
+# cutting_jsons.pyで生成されたjsonに対し、一日一定数以上１人によってtweetされたtweet群を抜き出す。
 # python3 src/reduce_jsons_4_trajectories/reduce_jsons_4_trajectories.py 4
 
 import json
