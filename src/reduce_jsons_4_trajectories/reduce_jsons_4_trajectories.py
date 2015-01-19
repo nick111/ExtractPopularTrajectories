@@ -2,7 +2,7 @@
 
 # Usage
 # utting_jsons.pyに対し、
-# python3 src/reduce_jsons_4_trajectories/reduce_jsons_4_trajectories.py 3
+# python3 src/reduce_jsons_4_trajectories/reduce_jsons_4_trajectories.py 4
 
 import json
 import sys
@@ -30,7 +30,7 @@ for cut_json in cut_jsons:
 	fr = open(cut_json,'r')
 	for line in fr:
 		tweet = json.loads(line)
-		if tweet["user_id"] not in user_id:
+		if tweet["user_id"] not in user_dict:
 			user_dict[tweet["user_id"]] = dict()
 		if tweet["relative_datetime"].split(' ')[0] not in user_dict[tweet["user_id"]]:
 			user_dict[tweet["user_id"]][tweet["relative_datetime"].split(' ')[0]] = 1
