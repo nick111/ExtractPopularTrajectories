@@ -16,6 +16,7 @@ current_time = datetime.datetime.today()
 
 cut_jsons = glob.glob('data/reduce_jsons_4_trajectories/cut_jsons/*')
 fw_path = 'result/reduce_jsons_4_trajectories/' + 'reduce_jsons_4_trajectories' + str(current_time.year) + '_' + str(current_time.month) + '_' + str(current_time.day) + '_' + str(current_time.hour) + '_' + str(current_time.minute) + '.json'
+fr_holiday = open('data/reduce_jsons_4_trajectories/holiday/holiday_list.txt','r')
 
 least_tweet_num = int(param[1])
 
@@ -53,6 +54,10 @@ for cut_json in cut_jsons:
 		in_num += 1
 		if user_dict[tweet["user_id"]][tweet["relative_datetime"].split(' ')[0]] >= least_tweet_num:
 			out_num += 1
+			if tweet["relative_datetime"].split(' ')[0] not in holidays:
+				tweet.update({"day_class": 'workday'})
+			else:
+				tweet.update({"day_class": 'holiday'})
 			fw = open(fw_path, 'a')
 			fw.write(json.dumps(tweet))
 			fw.write('\n')
