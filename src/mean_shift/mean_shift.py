@@ -33,10 +33,10 @@ def latlngToDistance(lat1, lng1, lat2, lng2):
 	r_y = GRS80_R_Y
 	dif_lat = math.pi * (lat1 - lat2) / 180.0
 	dif_lng = math.pi * (lng1 - lng2) / 180.0
-	mean_lat = math.pi * (lat1 + lat2) / 180.0 / 2
+	mean_lat = math.pi * (lat1 + lat2) / 180.0 / 2.0
 	eccentricity = math.sqrt(( r_x ** 2 - r_y ** 2 ) / ( r_x ** 2 ))
-	w = math.sqrt(1 - (eccentricity ** 2) * (math.sin(mean_lat) ** 2))
-	m = r_x * ( 1 - eccentricity ** 2 ) / ( w ** 3 )
+	w = math.sqrt(1.0 - (eccentricity ** 2) * (math.sin(mean_lat) ** 2))
+	m = r_x * ( 1.0 - eccentricity ** 2 ) / ( w ** 3 )
 	n = r_x / w
 	d = math.sqrt((dif_lng * m) ** 2 + (dif_lat * n * math.cos(mean_lat)) ** 2)
 	return d

@@ -8,6 +8,9 @@
 # python3 src/reduce_jsons_4_trajectories/reduce_jsons_4_trajectories.py 4 10.0
 # python3 src/reduce_jsons_4_trajectories/reduce_jsons_4_trajectories.py 4 10.0 0 5 8
 # python3 src/reduce_jsons_4_trajectories/reduce_jsons_4_trajectories.py 4 10.0 0 0 5
+# python3 src/reduce_jsons_4_trajectories/reduce_jsons_4_trajectories.py 4 10.0 0 13 19
+# python3 src/reduce_jsons_4_trajectories/reduce_jsons_4_trajectories.py 20 5000.0
+# python3 src/reduce_jsons_4_trajectories/reduce_jsons_4_trajectories.py 10 3000.0
 
 import json
 import sys
@@ -41,6 +44,16 @@ def latlngToDistance(lat1, lng1, lat2, lng2):
 	d = math.sqrt((dif_lng * m) ** 2 + (dif_lat * n * math.cos(mean_lat)) ** 2)
 	return d
 
+location = json.load(open('data/reduce_jsons_4_trajectories/location/location.json','r'))
+nouth_lat = float(location["nouth_lat"])
+south_lat = float(location["south_lat"])
+east_lng = float(location["east_lng"])
+west_lng = float(location["west_lng"])
+lat_denominator = location["lat_denominator"]
+lng_denominator = location["lng_denominator"]
+lat_numerator = (nouth_lat - south_lat) / lat_denominator
+lng_numerator = (east_lng - west_lng) / lng_denominator
+
 
 fr_holiday = open('data/reduce_jsons_4_trajectories/holiday/holiday_list.txt','r')
 holidays = []
@@ -62,6 +75,10 @@ for cut_json in cut_jsons:
 	fr = open(cut_json,'r')
 	for line in fr:
 		tweet = json.loads(line)
+		cell_lat_num = int((nouth_lat - float(tweet["coordinates"][1])) / lat_numerator)
+		cell_lng_num = int((float(tweet["coordinates"][0]) - west_lng) / lng_numerator)
+		if(cell_lat_num < 0 or lat_denominator <= cell_lat_num or cell_lng_num < 0 or lng_denominator <= cell_lng_num):
+			continue
 		if tweet["user_id"] not in user_dict:
 			user_dict[tweet["user_id"]] = dict()
 		if "previous_tweet" not in user_dict[tweet["user_id"]]:
@@ -70,10 +87,17 @@ for cut_json in cut_jsons:
 			if radius_of_convergence > latlngToDistance(float(user_dict[tweet["user_id"]]["previous_tweet"]["coordinates"][1]), float(user_dict[tweet["user_id"]]["previous_tweet"]["coordinates"][0]), float(tweet["coordinates"][1]), float(tweet["coordinates"][0])):
 				abondon_tweets_id.append(tweet["tweet_id"])
 				continue
-		if tweet["relative_datetime"].split(' ')[0] not in user_dict[tweet["user_id"]]:
-			user_dict[tweet["user_id"]][tweet["relative_datetime"].split(' ')[0]] = 1
+		if "number" not in user_dict[tweet["user_id"]]:
+			user_dict[tweet["user_id"]]["number"] = 1
 		else:
-			user_dict[tweet["user_id"]][tweet["relative_datetime"].split(' ')[0]] += 1
+			user_dict[tweet["user_id"]]["number"] += 1
+
+num_list = []
+for user_id in user_dict:
+	num_list.append(user_dict[user_id]["number"])
+num_list.sort()
+num_list.reverse()
+thres_num = num_list[500]
 
 
 print("outputting")
@@ -89,11 +113,17 @@ for cut_json in cut_jsons:
 	print(str(datetime.datetime.today()))
 	fr = open(cut_json,'r')
 	for line in fr:
-		tweet = json.loads(line)
 		in_num += 1
+		tweet = json.loads(line)
+		cell_lat_num = int((nouth_lat - float(tweet["coordinates"][1])) / lat_numerator)
+		cell_lng_num = int((float(tweet["coordinates"][0]) - west_lng) / lng_numerator)
+		if(cell_lat_num < 0 or lat_denominator <= cell_lat_num or cell_lng_num < 0 or lng_denominator <= cell_lng_num):
+			continue
+		if user_dict[tweet["user_id"]]["number"] < thres_num:
+			continue
 		if tweet["tweet_id"] in abondon_tweets_id:
 			continue
-		if user_dict[tweet["user_id"]][tweet["relative_datetime"].split(' ')[0]] >= least_tweet_num:
+		if user_dict[tweet["user_id"]]["number"] >= least_tweet_num:
 			if len(param) > 3:
 				if tweet["relative_datetime"].split(' ')[0] in holidays:
 					if not param[3] == '1':

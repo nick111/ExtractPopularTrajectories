@@ -69,5 +69,17 @@ for line in fr:
 		if max_group_id < int(point):
 			max_group_id = int(point)
 
+prefix_span(front_list, rear_list)
+
+
+os.mkdir(directory_path)
+
+for tr in tr_dict.keys():
+	fw = open(fw_path, 'a')
+	fw.write(json.dumps({"trajectory": string2list(tr),"num": tr_dict[tr]}))
+	fw.write('\n')
+	fw.close
+
+
 
 
